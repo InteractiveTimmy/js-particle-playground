@@ -1,0 +1,28 @@
+{
+  "name": "js-particle-playground",
+  "version": "0.1.0",
+  "description": "JavaScript Particle Playground",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server ./examples -o",
+    "build": "rollup -c",
+    "watch": "rollup -c --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/InteractiveTimmy/js-particle-playground.git"
+  },
+  "author": "InteractiveTimmy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/InteractiveTimmy/js-particle-playground/issues"
+  },
+  "homepage": "https://github.com/InteractiveTimmy/js-particle-playground#readme",
+  "devDependencies": {
+    "rollup": "^1.1.2"
+  },
+  "dependencies": {
+    "http-server": "^0.11.1"
+  }
+}
