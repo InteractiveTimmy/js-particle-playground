@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>JavaScript Particle Playground</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="index.js" type="text/javascript"></script>
+    <script src="jpp.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="target-container">
+      <div id="canvas-container">
+        <canvas id="target-canvas"></canvas>
+      </div>
+      <div id="target-toggle-menu" onclick="toggleMenu()">
+        <div>●</div>
+        <div>●</div>
+        <div>●</div>
+      </div>
+      <div id="target-menu" class="tm-open">
+        <div class="container mc-open" id="menu-container">
+          <form>
+            <br />
+            <h1>Modifiers</h1>
+            <br />
+            <div class="form-group">
+              
+              <!-- particles -->
+              <div class="form-group">
+                <div class="form-group form-row">
+                  <label class="col-sm-4 col-form-label-sm">Particle Color</label>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="255" class="form-control form-control-sm" id="input-particle-color-red" placeholder="R" value="0">
+                  </div>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="255" class="form-control form-control-sm" id="input-particle-color-green" placeholder="G" value="160">
+                  </div>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="255" class="form-control form-control-sm" id="input-particle-color-blue" placeholder="B" value="240">
+                  </div>
+                </div>
+                <div class="form-group form-row">
+                  <label class="col-sm-4 col-form-label-sm">Connect Color</label>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="255" class="form-control form-control-sm" id="input-connect-color-red" placeholder="R" value="0">
+                  </div>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="255" class="form-control form-control-sm" id="input-connect-color-green" placeholder="G" value="160">
+                  </div>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="255" class="form-control form-control-sm" id="input-connect-color-blue" placeholder="B" value="240">
+                  </div>
+                </div>
+                <div class="form-group form-row">
+                  <label class="col-sm-4 col-form-label-sm">Background Color</label>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="255" class="form-control form-control-sm" id="input-background-color-red" placeholder="R" value="0">
+                  </div>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="255" class="form-control form-control-sm" id="input-background-color-green" placeholder="G" value="40">
+                  </div>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="255" class="form-control form-control-sm" id="input-background-color-blue" placeholder="B" value="60">
+                  </div>
+                </div>
+
+                <br />
+
+                <div class="form-group form-row">
+                  <label class="col-sm-4 col-form-label-sm">Particle Amount</label>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="2147483647" class="form-control form-control-sm" id="input-particle-amount" placeholder="0 - 2147483647" value="100">
+                  </div>
+                </div>
+                <div class="form-group form-row">
+                  <label class="col-sm-4 col-form-label-sm">Max Velocity</label>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="100" step="0.01" class="form-control form-control-sm" id="input-velocity-x" placeholder="X" value="0.1">
+                  </div>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="100" step="0.01" class="form-control form-control-sm" id="input-velocity-y" placeholder="Y" value="0.1">
+                  </div>
+                </div>
+                <div class="form-group form-row">
+                  <label class="col-sm-4 col-form-label-sm">Particle Gravity</label>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="1024" step="0.01" class="form-control form-control-sm" id="input-gravity-x" placeholder="X" value="0">
+                  </div>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="1024" step="0.01" class="form-control form-control-sm" id="input-gravity-y" placeholder="Y" value="0">
+                  </div>
+                </div>
+                <div class="form-group form-row">
+                  <label class="col-sm-4 col-form-label-sm">Connect Ratio</label>
+                  <div class="col-sm">
+                    <input type="number" min="0" max="100" step="0.01" class="form-control form-control-sm" id="input-connect-ratio" placeholder="0 - 100" value="10">
+                  </div>
+                </div>
+                <div class="form-group form-row">
+                  <label class="col-sm-4 col-form-label-sm">Webworkers</label>
+                  <div class="col-sm">
+                    <input type="number" min="1" max="32" step="0.01" class="form-control form-control-sm" id="input-webworker-count" placeholder="1 - 32" value="1">
+                  </div>
+                </div>
+              </div>
+
+              <br />
+
+              <div class="form-group">
+                <div class="form-group row">
+                  <div class="col-sm-10">Use Webworkers</div>
+                  <div class="col-sm-2">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="input-use-webworkers">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <div class="col-sm-10">Follow Mouse</div>
+                  <div class="col-sm-2">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="input-follow-mouse">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <div class="col-sm-10">Connect Mouse</div>
+                  <div class="col-sm-2">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="input-connect-mouse">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <div class="col-sm-10">Hotspot Mouse</div>
+                  <div class="col-sm-2">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="input-hotspot-mouse">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-lg btn-block">Apply</button>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
