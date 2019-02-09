@@ -1,6 +1,6 @@
 import { UUID } from '../utils/index.js';
 
-class Component
+class Webworker
 {
   constructor ( )
   {
@@ -12,7 +12,7 @@ class Component
     } );
   }
 
-  get isComponent ( ) { return true; }
+  get isWebworker ( ) { return true; }
 }
 
-export default Component;
+export default Webworker;

@@ -1,7 +1,10 @@
 'use strict';
 
-let logicalProcessors = window.navigator.hardwareConcurrency
-console.log( logicalProcessors );
+const myEntity = new JPP.Entity( );
+const myEntityB = new JPP.Entity( );
+const myComponent = new JPP.components.TestComponent( );
+const mySystem = new JPP.systems.TestSystem( );
+const myInstance = new JPP.Instance( );
 
 let config = { };
 
@@ -38,6 +41,16 @@ document.onreadystatechange = ( ) => {
     form.addEventListener( 'submit', applyModifications );
     config.canvas.addEventListener( 'mousemove', readMouse );
     window.addEventListener( 'resize', handleResize );
+
+    myInstance.load( myEntity, myEntityB, mySystem );
+
+    console.log( {
+      entity: myEntity,
+      entityB: myEntityB,
+      component: myComponent,
+      system: mySystem,
+      instance: myInstance
+    } );
   }
 };
 
