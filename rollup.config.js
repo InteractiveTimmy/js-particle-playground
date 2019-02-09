@@ -9,7 +9,7 @@ export default {
     },
     {
       format: 'umd',
-      name: 'SPT',
+      name: 'JPP',
       file: 'examples/jpp.js',
       indent: '\t'
     },
