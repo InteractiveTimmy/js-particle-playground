@@ -20,6 +20,10 @@ class Instance
       webworkers: {
         value: [ ],
         writable: false
+      },
+      stats: {
+        value: { },
+        writable: false
       }
     } );
   }
@@ -124,9 +128,29 @@ class Instance
     return this;
   }
 
+  start ( )
+  {
+    if ( this.stats.active ) { return; }
+
+    this.stats.active = true;
+    this.step( );
+  }
+
+  stop ( )
+  {
+    if ( !this.stats.active ) { return; }
+
+    this.stats.active = false;
+  }
+
   step ( )
   {
+    if ( this.stats.active )
+    { setTimeout( ( ) => { this.step( ); } ); }
 
+    this.systems.forEach( ( system ) => {
+      system.update( );
+    } );
   }
 }
 

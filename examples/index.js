@@ -1,11 +1,5 @@
 'use strict';
 
-const myEntity = new JPP.Entity( );
-const myEntityB = new JPP.Entity( );
-const myComponent = new JPP.components.TestComponent( );
-const mySystem = new JPP.systems.TestSystem( );
-const myInstance = new JPP.Instance( );
-
 let config = { };
 
 // dom modifiers -- begin
@@ -29,8 +23,6 @@ document.onreadystatechange = ( ) => {
     elmWWC.max = logicalProcessors;
     elmWWC.value = logicalProcessors;
 
-    console.log( elmWWC );
-
     applyModifications( );
 
     config.canvas = document.querySelector( 'canvas' );
@@ -42,15 +34,11 @@ document.onreadystatechange = ( ) => {
     config.canvas.addEventListener( 'mousemove', readMouse );
     window.addEventListener( 'resize', handleResize );
 
-    myInstance.load( myEntity, myEntityB, mySystem );
+    handleResize( );
+    
+    this.setTimeout( ( ) => { handleResize( ); }, 1200 );
 
-    console.log( {
-      entity: myEntity,
-      entityB: myEntityB,
-      component: myComponent,
-      system: mySystem,
-      instance: myInstance
-    } );
+    init( );
   }
 };
 
@@ -101,6 +89,11 @@ function applyModifications ( e )
   config.connectMouse = document.querySelector( '#input-connect-mouse' ).checked;
   config.hotspotMouse = document.querySelector( '#input-hotspot-mouse' ).checked;
 
+  if ( myInstance.stats.active )
+  {
+    updateEntities( );
+  }
+
   console.log( 'changed config', config );
 }
 
@@ -120,5 +113,13 @@ function handleResize ( e )
   config.canvas.height = config.canvas.parentElement.clientHeight;
 
   console.log( config.canvas.width, config.canvas.height );
+
+  myInstance.entities.forEach( ( entity ) => {
+    if ( entity.bounds )
+    {
+      entity.bounds.r = config.canvas.width;
+      entity.bounds.b = config.canvas.height;
+    }
+  } );
 }
 // dom modifiers -- end

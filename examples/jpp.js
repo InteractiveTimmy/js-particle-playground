@@ -61,7 +61,7 @@
 	  load ( ...components )
 	  {
 	    components.forEach( ( component ) => {
-	      if ( !this.components.includes( component ) && component.isComponent )
+	      if ( !this.components.includes( component ) && component.isComponent && !this[component.constructor.name.toLowerCase( )] )
 	      {
 	        if ( component.entity )
 	        { component.entity.unload( component ); }
@@ -69,6 +69,7 @@
 	        component.entity = this;
 
 	        this.components.push( component );
+	        this[component.constructor.name.toLowerCase( )] = component;
 
 	        if ( this.instance )
 	        {
@@ -87,6 +88,7 @@
 	    components.forEach( ( component ) => {
 	      if ( this.components.includes( component ) )
 	      {
+	        this[component.constructor.name.toLowerCase( )] = null;
 	        this.components.splice( this.components.indexOf( component ), 1 );
 	        component.parent = null;
 	      }
@@ -148,6 +150,12 @@
 
 	    return this;
 	  }
+
+	  update ( dt )
+	  { this.onUpdate( dt ); }
+
+	  onUpdate ( dt )
+	  { }
 	}
 
 	class Instance
@@ -169,6 +177,10 @@
 	      },
 	      webworkers: {
 	        value: [ ],
+	        writable: false
+	      },
+	      stats: {
+	        value: { },
 	        writable: false
 	      }
 	    } );
@@ -274,9 +286,29 @@
 	    return this;
 	  }
 
+	  start ( )
+	  {
+	    if ( this.stats.active ) { return; }
+
+	    this.stats.active = true;
+	    this.step( );
+	  }
+
+	  stop ( )
+	  {
+	    if ( !this.stats.active ) { return; }
+
+	    this.stats.active = false;
+	  }
+
 	  step ( )
 	  {
+	    if ( this.stats.active )
+	    { setTimeout( ( ) => { this.step( ); } ); }
 
+	    this.systems.forEach( ( system ) => {
+	      system.update( );
+	    } );
 	  }
 	}
 
@@ -295,37 +327,305 @@
 	  get isWebworker ( ) { return true; }
 	}
 
-	class TestComponent extends Component
+	class Bounds extends Component
 	{
-	  constructor ( )
+	  constructor ( t, r, b, l, rigidity, friction )
 	  {
 	    super( );
 
-	    this.x = 5;
-	    this.y = 6;
+	    this.t = t;
+	    this.r = r;
+	    this.b = b;
+	    this.l = l;
+	    this.rigidity = rigidity;
+	    this.friction = friction;
+	  }
+	}
+
+	class Color extends Component
+	{
+	  constructor ( fr = 0, fg = 0, fb = 0, fa = 1.0, sr = 0, sg = 0, sb = 0, sa = 1.0 )
+	  {
+	    super( );
+
+	    this.fr = fr; this.fg = fg; this.fb = fb; this.fa = fa;
+	    this.sr = sr; this.sg = sg; this.sb = sb; this.sa = sa;
+	  }
+	}
+
+	class Connection extends Component
+	{
+	  constructor ( ml = 0 )
+	  {
+	    super( );
+
+	    this.maxLength = ml;
+	    this.connections = [ ];
+	    this.connectors = [ ];
+	  }
+	}
+
+	class Context extends Component
+	{
+	  constructor ( context )
+	  {
+	    super( );
+
+	    this.data = context;
+	  }
+	}
+
+	class Gravity extends Component
+	{
+	  constructor ( x = 0, y = 0 )
+	  {
+	    super( );
+
+	    this.x = x;
+	    this.y = y;
+	  }
+	}
+
+	class Position extends Component
+	{
+	  constructor ( x = 0, y = 0 )
+	  {
+	    super( );
+
+	    this.x = x;
+	    this.y = y;
+	  }
+	}
+
+	class Model extends Component
+	{
+	  constructor ( type, data, fill, stroke )
+	  {
+	    super( );
+
+	    this.type = type;
+	    this.data = data;
+	    this.fill = fill;
+	    this.stroke = stroke;
+	  }
+	}
+
+	class Velocity extends Component
+	{
+	  constructor ( x = 0, y = 0 )
+	  {
+	    super( );
+
+	    this.x = x;
+	    this.y = y;
 	  }
 	}
 
 
 
 	var index = /*#__PURE__*/Object.freeze({
-		TestComponent: TestComponent
+		Bounds: Bounds,
+		Color: Color,
+		Connection: Connection,
+		Context: Context,
+		Gravity: Gravity,
+		Position: Position,
+		Model: Model,
+		Velocity: Velocity
 	});
 
-	class TestSystem extends System
+	class Bounder extends System
 	{
 	  constructor ( )
 	  {
 	    super( );
 
-	    this.components.push( TestComponent );
+	    this.components.push( Position, Velocity, Bounds );
+	  }
+
+	  onUpdate ( dt )
+	  {
+	    this.entities.forEach( ( entity ) => {
+	      if ( entity.position.x < entity.bounds.l )
+	      {
+	        entity.position.x = entity.bounds.l;
+	        entity.velocity.x *= -1 * entity.bounds.rigidity;
+	        entity.velocity.y *= entity.bounds.friction;
+	      }
+	      else if ( entity.position.x > entity.bounds.r )
+	      {
+	        entity.position.x = entity.bounds.r;
+	        entity.velocity.x *= -1 * entity.bounds.rigidity;
+	        entity.velocity.y *= entity.bounds.friction;
+	      }
+
+	      if ( entity.position.y < entity.bounds.t )
+	      {
+	        entity.position.y = entity.bounds.t;
+	        entity.velocity.y *= -1 * entity.bounds.rigidity;
+	        entity.velocity.x *= entity.bounds.friction;
+	      }
+	      else if ( entity.position.y > entity.bounds.b )
+	      {
+	        entity.position.y = entity.bounds.b;
+	        entity.velocity.y *= -1 * entity.bounds.rigidity;
+	        entity.velocity.x *= entity.bounds.friction;
+	      }
+	    } );
+	  }
+	}
+
+	var distanceTo = ( vecA, vecB ) =>
+	{ return Math.sqrt( Math.pow( ( vecB.x - vecA.x ), 2 ) + Math.pow( ( vecB.y - vecA.y ), 2 ) ); };
+
+	class Connector extends System
+	{
+	  constructor ( )
+	  {
+	    super( );
+
+	    this.components.push( Position, Connection, Color );
+	    this.connections = [ ];
+	  }
+
+	  onUpdate ( dt )
+	  {
+	    this.entities.forEach( ( entityA ) => {
+	      this.entities.forEach( ( entityB ) => {
+	        if ( entityA !== entityB )
+	        {
+	          if ( distanceTo( entityA.position, entityB.position ) < entityA.connection.maxLength && !entityA.connection.connections.includes( entityB ) )
+	          {
+	            console.log( entityA.connection.connectors.length );
+	            this.instance.loadEntities(
+	              new Entity( ).load(
+	                new Position( ),
+	                new Color( ),
+	                new Model( 'line', [ entityA.position, entityB.position ], false, true ),
+	                new Context( entityA.context.data )
+	              )
+	            );
+
+	            entityA.connection.connections.push( entityB );
+	            entityA.connection.connectors.push( this.instance.entities[this.instance.entities.length - 1] );
+	          }
+	          else if ( entityA.connection.connections.includes( entityB ) )
+	          {
+	            console.log( 'hi' );
+	            entityA.connection.connections.splice(
+	              entityA.connection.connections.indexOf( entityB ), 1
+	            );
+
+	            console.log( entityA.connection.connectors[entityA.connection.connections.indexOf( entityB )] );
+
+	            this.instance.unloadEntities( entityA.connection.connectors[entityA.connection.connections.indexOf( entityB )] );
+	            entityA.connection.connectors.splice(
+	              entityA.connection.connections.indexOf( entityB ), 1
+	            );
+	          }
+	        }
+
+	      } );
+	    } );
+	  }
+	}
+
+	class Bounder$1 extends System
+	{
+	  constructor ( )
+	  {
+	    super( );
+
+	    this.components.push( Velocity, Gravity );
+	  }
+
+	  onUpdate ( dt )
+	  {
+	    this.entities.forEach( ( entity ) => {
+	      entity.velocity.x -= entity.gravity.x;
+	      entity.velocity.y -= entity.gravity.y;
+	    } );
+	  }
+	}
+
+	class Movement extends System
+	{
+	  constructor ( )
+	  {
+	    super( );
+
+	    this.components.push( Position, Velocity );
+	  }
+
+	  onUpdate ( dt )
+	  {
+	    this.entities.forEach( ( entity ) => {
+	      entity.position.x += entity.velocity.x;
+	      entity.position.y += entity.velocity.y;
+	    } );
+	  }
+	}
+
+	class Render extends System
+	{
+	  constructor ( canvas, context )
+	  {
+	    super( );
+
+	    this.components.push( Context, Position, Color, Model );
+
+	    this.canvas = canvas;
+	    this.context = context;
+	  }
+
+	  onUpdate ( dt )
+	  {
+	    this.context.clearRect( 0, 0, this.canvas.width, this.canvas.height );
+
+	    this.entities.forEach( ( entity ) => {
+	      switch( entity.model.type )
+	      {
+	        case 'circle':
+	          entity.context.data.beginPath( );
+	          entity.context.data.arc( entity.position.x, entity.position.y, entity.model.data, 0, 2 * Math.PI );
+	          entity.context.data.closePath( );
+
+	          if ( entity.model.fill )
+	          {
+	            entity.context.data.fillStyle = `rgba( ${entity.color.fr}, ${entity.color.fg}, ${entity.color.fb}, ${entity.color.fa} )`;
+	            entity.context.data.fill( );
+	          }
+
+	          if ( entity.model.stroke )
+	          {
+	            entity.context.data.strokeStyle = `rgba( ${entity.color.sr}, ${entity.color.sg}, ${entity.color.sb}, ${entity.color.sa} )`;
+	            entity.context.data.stroke( );
+	          }
+
+	          break;
+
+	          case 'line':
+	            entity.context.data.beginPath( );
+	            entity.context.data.moveTo( entity.model.data[0].x, entity.model.data[0].y );
+	            entity.context.data.lineTo( entity.model.data[1].x, entity.model.data[1].y );
+	            entity.context.data.closePath( );
+	            entity.context.data.strokeStyle = `rgba( ${entity.color.sr}, ${entity.color.sg}, ${entity.color.sb}, ${entity.color.sa} )`;
+	            entity.context.data.stroke( );
+	            
+	            break;
+	      }
+	    } );
 	  }
 	}
 
 
 
 	var index$1 = /*#__PURE__*/Object.freeze({
-		TestSystem: TestSystem
+		Bounder: Bounder,
+		Connector: Connector,
+		Gravitation: Bounder$1,
+		Movement: Movement,
+		Render: Render
 	});
 
 	exports.components = index;

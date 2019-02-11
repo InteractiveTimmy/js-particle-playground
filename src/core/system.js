@@ -45,6 +45,12 @@ class System
 
     return this;
   }
+
+  update ( dt )
+  { this.onUpdate( dt ); }
+
+  onUpdate ( dt )
+  { }
 }
 
 export default System;

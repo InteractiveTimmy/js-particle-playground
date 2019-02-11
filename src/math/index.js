@@ -1,0 +1,1 @@
+export { default as distanceTo } from './distance-to.js';

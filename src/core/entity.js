@@ -21,7 +21,7 @@ class Entity
   load ( ...components )
   {
     components.forEach( ( component ) => {
-      if ( !this.components.includes( component ) && component.isComponent )
+      if ( !this.components.includes( component ) && component.isComponent && !this[component.constructor.name.toLowerCase( )] )
       {
         if ( component.entity )
         { component.entity.unload( component ); }
@@ -29,6 +29,7 @@ class Entity
         component.entity = this;
 
         this.components.push( component );
+        this[component.constructor.name.toLowerCase( )] = component;
 
         if ( this.instance )
         {
@@ -47,6 +48,7 @@ class Entity
     components.forEach( ( component ) => {
       if ( this.components.includes( component ) )
       {
+        this[component.constructor.name.toLowerCase( )] = null;
         this.components.splice( this.components.indexOf( component ), 1 );
         component.parent = null;
       }
